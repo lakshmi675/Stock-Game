@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>FUN WITH GAIN – Virtual Stock Game</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<style>
+:root{--bg:#0b1020;--card:#141b34;--card2:#1b2445;--line:#263059;--txt:#e8ecff;--mut:#8f9ac4;--acc:#6c5ce7;--acc2:#00d1b2;--up:#2ecc71;--down:#ff5d73;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:radial-gradient(1200px 600px at 80% -10%,#26307a55,transparent),var(--bg);color:var(--txt);padding-bottom:84px;min-height:100vh}
+.wrap{max-width:860px;margin:auto;padding:16px}
+header{text-align:center;padding:10px 0 4px}
+header h1{margin:0;font-size:28px;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:12px}header h1 span{background:linear-gradient(90deg,var(--acc2),var(--acc));-webkit-background-clip:text;background-clip:text;color:transparent}.logo{filter:drop-shadow(0 4px 12px #6c5ce766)}
+header small{color:var(--mut)}
+.timer{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin:14px 0;text-align:center}
+.timer b{font-size:26px;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--card2);border-radius:9px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc2),var(--acc));transition:width 1s linear}
+.timer.low b{color:var(--down);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.5}}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;gap:6px;justify-content:center;background:#0b1020ee;backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{flex:1;max-width:160px;background:none;border:0;color:var(--mut);font-size:12px;padding:8px 4px;border-radius:12px;cursor:pointer}
+nav button span{display:block;font-size:20px}
+nav button.on{color:#fff;background:var(--card2)}
+.panel{display:none;animation:in .25s}.panel.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.card h2{margin:0 0 12px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+input{width:100%;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:15px}
+input:focus{outline:2px solid var(--acc);border-color:transparent}
+label{font-size:12px;color:var(--mut);display:block;margin:0 0 4px}
+button.btn{padding:12px 18px;border:0;border-radius:10px;font-weight:600;font-size:15px;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--acc),#8e7dff);transition:.15s}
+button.btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+button.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.buy{background:linear-gradient(135deg,#1fb36b,var(--up))}.btn.sell{background:linear-gradient(135deg,#e0475d,var(--down))}
+.btn.ghost{background:var(--card2);border:1px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.row .btn{flex:1}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:6px 12px;border-radius:99px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--acc2)}
+.quote{font-size:34px;font-weight:700;margin:6px 0;font-variant-numeric:tabular-nums}
+.mut{color:var(--mut);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:19px;margin-top:4px}
+.up{color:var(--up)}.down{color:var(--down)}
+.hold{display:flex;justify-content:space-between;gap:10px;padding:14px;background:var(--card2);border-radius:12px;margin-bottom:10px;border-left:4px solid var(--mut)}
+.hold.up{border-color:var(--up);color:inherit}.hold.down{border-color:var(--down);color:inherit}
+.hold h3{margin:0 0 4px;font-size:16px}.hold .r{text-align:right}
+.lb{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card2);border-radius:12px;margin-bottom:8px}
+.lb.me{outline:2px solid var(--acc2)}.lb .rk{font-size:22px;width:34px;text-align:center}.lb .nm{flex:1;font-weight:600}
+.empty{text-align:center;color:var(--mut);padding:24px}
+.banner{display:none;background:linear-gradient(135deg,#f6b93b,#e58e26);color:#2b1b00;border-radius:16px;padding:16px;text-align:center;font-weight:700;margin-bottom:14px}
+#toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px)}
+.toast{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--acc);padding:12px 14px;border-radius:12px;box-shadow:0 8px 24px #0008;animation:in .25s}
+.toast.ok{border-left-color:var(--up)}.toast.err{border-left-color:var(--down)}
+@media(min-width:700px){nav{position:static;background:none;border:0;margin-bottom:14px;padding:0}nav button{background:var(--card);border:1px solid var(--line)}body{padding-bottom:20px}}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+<div class="wrap">
+  <header><h1><svg class="logo" width="44" height="44" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00d1b2"/><stop offset="1" stop-color="#6c5ce7"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lg)"/><path d="M10 33 L19 24 L25 29 L37 16" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 15 H38 V24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>FUN WITH GAIN</span></h1><small>A Virtual Stock Trading Game</small></header>
+
+  <div class="timer" id="timerBox">
+    <div class="mut" id="roomLabel">Join or host a room to start</div>
+    <b id="timer">--:--</b>
+    <div class="bar"><i id="bar"></i></div>
+    <button class="btn ghost" id="leaveBtn" style="display:none;margin-top:12px;padding:8px 14px;font-size:13px" onclick="newGame()">🚪 Leave room</button>
+  </div>
+  <div class="banner" id="banner"></div>
+
+  <nav id="nav">
+    <button data-t="lobby" class="on"><span>🎮</span>Lobby</button>
+    <button data-t="market"><span>💹</span>Trade</button>
+    <button data-t="portfolio"><span>💼</span>Portfolio</button>
+    <button data-t="board"><span>🏆</span>Ranks</button>
+  </nav>
+
+  <!-- LOBBY -->
+  <section class="panel on" id="lobby">
+    <div class="card" id="hostCard">
+      <h2>🏠 Host Game</h2>
+      <div class="grid">
+        <div><label>Room ID</label><input id="room_id" placeholder="e.g. ROOM42"></div>
+        <div><label>Host Name</label><input id="host_name" placeholder="Your name"></div>
+        <div><label>Max Players</label><input id="max_players" type="number" min="1" value="5"></div>
+        <div><label>Initial Cash ($)</label><input id="initial_cash" type="number" min="1" value="10000"></div>
+        <div><label>Duration (minutes)</label><input id="duration" type="number" min="1" value="30"></div>
+      </div>
+      <div class="row"><button class="btn" id="createBtn" onclick="createRoom()">Create Room</button></div>
+    </div>
+    <div class="card" id="joinCard">
+      <h2>🚪 Join Game</h2>
+      <div class="grid">
+        <div><label>Room ID</label><input id="join_room_id" placeholder="Room ID"></div>
+        <div><label>Player Name</label><input id="player_name" placeholder="Your name"></div>
+      </div>
+      <div class="row"><button class="btn" id="joinBtn" onclick="joinRoom()">Join Room</button></div>
+    </div>
+  </section>
+
+  <!-- TRADE -->
+  <section class="panel" id="market">
+    <div class="card">
+      <h2>🔍 Stock Price <span class="mut" id="autoLbl"></span></h2>
+      <label>Ticker Symbol (use .NS for Indian stocks)</label>
+      <input id="ticker" placeholder="AAPL, TSLA, RELIANCE.NS" autocapitalize="characters" oninput="this.value=this.value.toUpperCase()">
+      <div class="chips" id="chips"></div>
+      <div class="quote" id="quote">—</div>
+      <div class="mut" id="quoteSub">Pick a stock to see its live price</div>
+      <button class="btn ghost" style="margin-top:10px" onclick="checkPrice()">🔁 Refresh Price</button>
+    </div>
+    <div class="card">
+      <h2>🛒 Place Order</h2>
+      <label>Quantity</label>
+      <input id="quantity" type="number" min="1" value="1" oninput="updateEst()">
+      <div class="mut" id="est" style="margin-top:8px">Estimated total: —</div>
+      <div class="row">
+        <button class="btn buy" id="buyBtn" onclick="trade('buy')">Buy</button>
+        <button class="btn sell" id="sellBtn" onclick="trade('sell')">Sell</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section class="panel" id="portfolio">
+    <div class="stats">
+      <div class="stat"><span class="mut">Cash</span><b id="sCash">$0</b></div>
+      <div class="stat"><span class="mut">Net Worth</span><b id="sNet">$0</b></div>
+      <div class="stat"><span class="mut">Profit</span><b id="sPnl">$0</b></div>
+    </div>
+    <div class="card"><h2>💼 Holdings <button class="btn ghost" style="padding:8px 12px" onclick="viewPortfolio()">🔁</button></h2>
+      <div id="holdings"><div class="empty">Join a room to see your portfolio</div></div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="panel" id="board">
+    <div class="card"><h2>🏆 Leaderboard <button class="btn ghost" style="padding:8px 12px" onclick="viewLeaderboard()">🔁</button></h2>
+      <div id="lb"><div class="empty">Join a room to see the rankings</div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const BACKEND = location.port === "8000" ? location.origin : "http://" + location.hostname + ":8000";   // same server when opened on :8000
+let playerId = sessionStorage.getItem("playerId");
+let roomId = sessionStorage.getItem("roomId");
+let playerName = sessionStorage.getItem("playerName") || "";
+let secondsLeft = null, totalSeconds = Number(sessionStorage.getItem("totalSeconds")) || 0;
+let tickInt = null, syncInt = null, over = false, lastPrice = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => (n < 0 ? "-$" : "$") + Math.abs(n).toFixed(2);
+
+function toast(msg, type = "") {
+  if ([...$("toasts").children].some(x => x.textContent === msg)) return;  // no duplicate stacking
+  const t = document.createElement("div"); t.className = "toast " + type; t.textContent = msg;
+  $("toasts").appendChild(t); setTimeout(() => t.remove(), 3500);
+}
+async function api(path, opts) {
+  let res;
+  try { res = await fetch(BACKEND + path, opts); }
+  catch (e) { throw new Error("Can't reach the server. Start the backend (port 8000) and try again."); }
+  let data = {}; try { data = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Request failed");
+  return data;
+}
+const post = body => ({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+/* ---------- tabs ---------- */
+function show(tab) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === tab));
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
+  if (tab === "portfolio") viewPortfolio();
+  if (tab === "board") viewLeaderboard();
+}
+$("nav").onclick = e => { const b = e.target.closest("button"); if (b) show(b.dataset.t); };
+
+/* ---------- room actions (same endpoints) ---------- */
+async function createRoom() {
+  const id = $("room_id").value.trim(), host = $("host_name").value.trim();
+  const duration = parseInt($("duration").value);
+  if (!id || !host || !duration) return toast("Fill in room ID, host name and duration", "err");
+  try {
+    const d = await api("/create_room/", post({
+      id, host, max_players: parseInt($("max_players").value) || 5,
+      initial_cash: parseFloat($("initial_cash").value) || 10000,
+      end_time: new Date(Date.now() + duration * 60000).toISOString()
+    }));
+    toast("🎉 " + d.message + " Share ID: " + id, "ok");
+    $("join_room_id").value = id; $("player_name").value = host;
+  } catch (e) {
+    toast(e.message.startsWith("Can't reach") ? "Couldn't create the room. If the server is running, this Room ID probably already exists – try a different ID or just join it." : e.message, "err");
+  }
+}
+async function joinRoom() {
+  const id = $("join_room_id").value.trim(), name = $("player_name").value.trim();
+  if (!id || !name) return toast("Enter room ID and your name", "err");
+  try {
+    const d = await api("/join_room/", post({ room_id: id, name }));
+    playerId = d.player_id; roomId = id; playerName = name; over = false;
+    $("banner").style.display = "none"; ["buyBtn", "sellBtn", "ticker", "quantity"].forEach(x => $(x).disabled = false);
+    ["finalPortfolio", "finalLeaderboard", "totalSeconds"].forEach(k => sessionStorage.removeItem(k));
+    sessionStorage.setItem("playerId", playerId); sessionStorage.setItem("roomId", roomId); sessionStorage.setItem("playerName", name);
+    toast("✅ Joined room " + id, "ok"); startTimer(); show("market");
+  } catch (e) { toast(e.message, "err"); }
+}
+
+/* ---------- market ---------- */
+const cur = t => t.toUpperCase().endsWith(".NS") ? "₹" : "$";
+["AAPL", "TSLA", "NVDA", "MSFT", "RELIANCE.NS", "TCS.NS", "INFY.NS"].forEach(t => {
+  const c = document.createElement("button"); c.className = "chip"; c.textContent = t;
+  c.onclick = () => { $("ticker").value = t; checkPrice(); }; $("chips").appendChild(c);
+});
+async function checkPrice(silent) {
+  const t = $("ticker").value.trim();
+  if (!t) return silent || toast("Enter a ticker symbol", "err");
+  try {
+    const d = await api(`/stock_price/${encodeURIComponent(t)}?t=${Date.now()}`);
+    const prev = lastPrice; lastPrice = d.price;
+    $("quote").textContent = `${cur(d.ticker)}${d.price}`;
+    $("quote").className = "quote " + (prev == null ? "" : d.price > prev ? "up" : d.price < prev ? "down" : "");
+    $("quoteSub").textContent = `${d.ticker} · updated ${new Date().toLocaleTimeString()}`;
+    updateEst();
+  } catch (e) { $("quote").textContent = "—"; $("quoteSub").textContent = "❌ Couldn't fetch price. Check the symbol."; lastPrice = null; }
+}
+function updateEst() {
+  const q = parseInt($("quantity").value) || 0, t = $("ticker").value;
+  $("est").textContent = lastPrice && q > 0 ? `Estimated total: ${cur(t)}${(lastPrice * q).toFixed(2)}` : "Estimated total: —";
+}
+$("ticker").addEventListener("change", () => { lastPrice = null; checkPrice(true); });
+
+async function trade(side) {
+  const ticker = $("ticker").value.trim(), quantity = parseInt($("quantity").value);
+  if (!playerId) return toast("Please join a room first", "err");
+  if (!ticker || !(quantity > 0)) return toast("Enter a valid ticker and quantity", "err");
+  const btn = $(side === "buy" ? "buyBtn" : "sellBtn"); btn.disabled = true;
+  try {
+    const d = await api(side === "buy" ? "/buy_stock/" : "/sell_stock/", post({ player_id: playerId, ticker, quantity }));
+    toast((side === "buy" ? "🟢 " : "🔴 ") + d.message, "ok");
+    viewPortfolio(true);
+  } catch (e) { toast(e.message, "err"); }
+  btn.disabled = over;
+}
+
+/* ---------- portfolio ---------- */
+async function viewPortfolio(quiet) {
+  if (!playerId) return;
+  const saved = sessionStorage.getItem("finalPortfolio");
+  try {
+    const d = over && saved ? JSON.parse(saved) : await api(`/portfolio/${playerId}`);
+    if (over && !saved) sessionStorage.setItem("finalPortfolio", JSON.stringify(d));
+    const worth = d.cash + d.holdings.reduce((s, h) => s + h.current_price * h.quantity, 0);
+    $("sCash").textContent = money(d.cash); $("sNet").textContent = money(worth);
+    $("sPnl").textContent = money(d.total_profit); $("sPnl").className = d.total_profit >= 0 ? "up" : "down";
+    $("holdings").innerHTML = d.holdings.length ? d.holdings.map(h => {
+      const pct = h.purchase_price ? (h.current_price / h.purchase_price - 1) * 100 : 0, cls = h.profit >= 0 ? "up" : "down";
+      return `<div class="hold ${cls}"><div><h3>${esc(h.ticker)}</h3>
+        <div class="mut">${h.quantity} shares · Buy ${money(h.purchase_price)}</div>
+        <div class="mut">Now ${money(h.current_price)} · Value ${money(h.current_price * h.quantity)}</div></div>
+        <div class="r"><b class="${cls}">${money(h.profit)}</b><div class="${cls}">${pct >= 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(2)}%</div></div></div>`;
+    }).join("") : `<div class="empty">No holdings yet — head to Trade and buy your first stock! 🚀</div>`;
+  } catch (e) { if (!quiet) toast("Couldn't load portfolio: " + e.message, "err"); }
+}
+
+/* ---------- leaderboard ---------- */
+async function viewLeaderboard() {
+  if (!roomId) return;
+  const saved = sessionStorage.getItem("finalLeaderboard");
+  try {
+    const d = over && saved ? JSON.parse(saved) : await api(`/leaderboard/${roomId}`);
+    if (over && !saved) sessionStorage.setItem("finalLeaderboard", JSON.stringify(d));
+    const medals = ["🥇", "🥈", "🥉"];
+    $("lb").innerHTML = d.length ? d.map((p, i) => `<div class="lb ${p.name === playerName ? "me" : ""}">
+      <div class="rk">${medals[i] || "#" + (i + 1)}</div><div class="nm">${esc(p.name)}${p.name === playerName ? " (you)" : ""}</div>
+      <b class="${p.total_profit >= 0 ? "up" : "down"}">${money(p.total_profit)}</b></div>`).join("") : `<div class="empty">No players yet</div>`;
+    if (over) showOver(d.length ? `🏁 Game Over! Winner: ${esc(d[0].name)} (${money(d[0].total_profit)})` : "🏁 Game Over!");
+  } catch (e) { toast("Couldn't load leaderboard: " + e.message, "err"); }
+}
+
+/* ---------- timer (polls server, counts down locally) ---------- */
+async function syncTime() {
+  try { secondsLeft = (await api(`/time_left/${roomId}`)).seconds_left;
+    if (!totalSeconds || secondsLeft > totalSeconds) { totalSeconds = secondsLeft; sessionStorage.setItem("totalSeconds", totalSeconds); }
+  } catch (e) { console.error("Timer sync error:", e); }
+}
+function render() {
+  if (secondsLeft == null) return;
+  if (secondsLeft <= 0) return endGame();
+  const m = Math.floor(secondsLeft / 60), s = secondsLeft % 60;
+  $("timer").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  $("bar").style.width = (totalSeconds ? (secondsLeft / totalSeconds) * 100 : 0) + "%";
+  $("timerBox").classList.toggle("low", secondsLeft <= 60);
+  secondsLeft--;
+}
+async function startTimer() {
+  if (!roomId) return;
+  clearInterval(tickInt); clearInterval(syncInt);
+  $("leaveBtn").style.display = "inline-block";
+  $("roomLabel").textContent = `Room ${roomId}` + (playerName ? ` · ${playerName}` : "");
+  await syncTime(); render();
+  tickInt = setInterval(render, 1000);
+  syncInt = setInterval(async () => { await syncTime(); if (!over) { viewPortfolio(true); } }, 15000);
+}
+async function endGame() {
+  if (over) return; over = true;
+  clearInterval(tickInt); clearInterval(syncInt);
+  $("timer").textContent = "Game Over!"; $("timerBox").classList.remove("low"); $("bar").style.width = "0%";
+  disableTrading(); showOver("🏁 Game Over!"); await viewPortfolio(true); await viewLeaderboard();
+  toast("🏁 Time's up! Final results are locked in.", "ok"); show("board");
+}
+function disableTrading() {
+  ["buyBtn", "sellBtn"].forEach(id => $(id).disabled = true);
+  ["ticker", "quantity"].forEach(id => $(id).disabled = true);
+}
+
+/* ---------- game over / new game ---------- */
+function showOver(text) {
+  $("banner").style.display = "block";
+  $("banner").innerHTML = text + '<br><button class="btn" style="margin-top:10px;background:#2b1b00" onclick="newGame()">🔄 Start New Game</button>';
+}
+function newGame() {
+  ["playerId", "roomId", "playerName", "totalSeconds", "finalPortfolio", "finalLeaderboard"].forEach(k => sessionStorage.removeItem(k));
+  location.reload();
+}
+
+/* ---------- on load ---------- */
+window.onload = () => {
+  const mode = new URLSearchParams(location.search).get("mode");
+  if (mode === "host") $("joinCard").style.display = "none";
+  if (mode === "join") $("hostCard").style.display = "none";
+  if (roomId) { $("join_room_id").value = roomId; $("player_name").value = playerName; startTimer(); }
+  setInterval(() => { if (!over && roomId && document.getElementById("board").classList.contains("on")) viewLeaderboard(); }, 20000);
+  setInterval(() => { if (!over && document.getElementById("market").classList.contains("on") && $("ticker").value) checkPrice(true); }, 15000);
+};
+</script>
+</body>
+</html>

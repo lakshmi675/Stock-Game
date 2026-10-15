@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>FUN WITH GAIN – Stock Game</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Segoe UI',system-ui,sans-serif;color:#e8ecff;background:radial-gradient(900px 500px at 80% -10%,#26307a88,transparent),#0b1020;padding:20px}
+.box{text-align:center;max-width:420px;width:100%}
+.logo{animation:f 3s ease-in-out infinite;filter:drop-shadow(0 8px 20px #6c5ce788)}
+@keyframes f{50%{transform:translateY(-10px)}}
+h1{margin:6px 0;font-size:34px;background:linear-gradient(90deg,#00d1b2,#6c5ce7);-webkit-background-clip:text;background-clip:text;color:transparent}
+p{color:#8f9ac4;margin:0 0 24px}
+a{display:block;padding:16px;margin:12px 0;border-radius:14px;color:#fff;text-decoration:none;font-weight:700;font-size:18px;transition:.15s}
+a:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.h{background:linear-gradient(135deg,#6c5ce7,#8e7dff)}.j{background:linear-gradient(135deg,#00b894,#00d1b2)}
+ul{list-style:none;padding:0;margin:28px 0 0;color:#8f9ac4;font-size:14px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo"><svg class="logo" width="88" height="88" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00d1b2"/><stop offset="1" stop-color="#6c5ce7"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lg)"/><path d="M10 33 L19 24 L25 29 L37 16" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 15 H38 V24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <h1>FUN WITH GAIN</h1>
+  <p>Trade real stocks with virtual money. Beat your friends.</p>
+  <a class="h" href="game.html?mode=host">🏠 Host a Game</a>
+  <a class="j" href="game.html?mode=join">🚪 Join a Game</a>
+  <ul><li>⏱ Live timer</li><li>💹 Real prices</li><li>🏆 Leaderboard</li></ul>
+</div>
+</body>
+</html>
